@@ -1,0 +1,32 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python tests
+        run: |
+          if find . -name 'test_*.py' -not -path './.git/*' | grep -q .; then
+            python -m unittest discover -v
+          else
+            echo "no Python tests yet"
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Node tests
+        run: |
+          if [ -f package.json ]; then
+            npm install --no-audit --no-fund
+            npm test --if-present
+          else
+            echo "no Node package yet"
+          fi
